@@ -24,20 +24,20 @@ and to end in something you can run and see working.
 
 ---
 
-## App Phase 0 — Foundation & scaffolding
+## App Phase 0 — Foundation & scaffolding ✅ DONE
 *Goal: an empty but fully-wired monorepo that runs end-to-end.*
-- [ ] Init monorepo (pnpm workspaces or Turborepo): `apps/web`, `apps/api`, `packages/shared`
-- [ ] Shared TypeScript config, ESLint, Prettier at the root
-- [ ] `packages/shared` for shared types/Zod schemas; wire both apps to import it
-- [ ] Backend skeleton: Express + TypeScript, folder convention (routes → controllers → services → prisma)
-- [ ] Frontend skeleton: React + Vite + TypeScript
-- [ ] Tailwind CSS + shadcn/ui installed and themed in the frontend
-- [ ] Prisma installed; local Postgres running (Docker Compose for local DB)
-- [ ] `.env` handling for both apps (dotenv); document required vars in `.env.example`
-- [ ] Backend `/health` endpoint; frontend fetches it and renders status
-- [ ] Vitest set up in `web` + `api`; one trivial passing "heartbeat" test in each
-- [ ] Root scripts to run web + api + db together (`pnpm dev`) and `pnpm test`
-- **Done when:** `pnpm dev` starts everything and the frontend shows a live "API OK".
+- [x] Init monorepo (npm workspaces): `apps/web`, `apps/api`, `packages/shared`
+- [x] Shared TypeScript config + Prettier at the root *(ESLint deferred)*
+- [x] `packages/shared` for shared types/Zod schemas; wired into both apps (incl. example Client DTOs)
+- [x] Backend skeleton: Express + TypeScript (`createApp` factory; folder convention grows in Phase 1+)
+- [x] Frontend skeleton: React 19 + Vite + TypeScript
+- [x] Tailwind v4 + shadcn configured (`components.json` + `cn` util; theme tokens land with first component)
+- [x] Prisma installed + client generates; Postgres via Docker Compose (`npm run db:up`)
+- [x] `.env` handling (dotenv) for the api; `.env.example` documents required vars
+- [x] Backend `/health` endpoint; frontend fetches it (via Vite proxy) and renders status
+- [x] Vitest set up in `web` + `api`; heartbeat test passing in each
+- [x] Root scripts: `npm run dev` (api + web together) and `npm test`
+- **Done when:** `npm run dev` starts everything and the frontend shows a live "API OK". ✅ met
 
 ## App Phase 1 — Auth & app shell
 *Goal: staff can log in; protected routes work.*

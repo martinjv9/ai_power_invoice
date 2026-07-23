@@ -16,9 +16,10 @@ a skeleton you trust.
 - **Monorepo**: one repository holding multiple projects (our `web`, `api`, and
   `shared`) instead of three separate repos. Easier to share code and keep
   versions in sync.
-- **pnpm workspaces / Turborepo**: tools that manage a monorepo — they let
-  `web` and `api` each have their own dependencies while sharing the `shared`
-  package.
+- **npm workspaces**: npm's built-in monorepo support — lets `web` and `api` each
+  have their own dependencies while sharing the `shared` package. (We chose npm
+  over pnpm because corepack's pnpm was broken on this machine; pnpm/Turborepo
+  remain options later.)
 - **Package**: a folder with its own `package.json` (list of dependencies + name).
   Our three packages are `apps/web`, `apps/api`, `packages/shared`.
 - **Prisma**: an ORM — a library that lets you talk to the Postgres database using
@@ -54,10 +55,10 @@ a skeleton you trust.
 9. **`/health` end to end.** Backend returns `{status:"ok"}`; frontend fetches it
    and shows it. *Why:* this single request proves the browser → API → (and soon
    DB) path works. It's the heartbeat of the whole setup.
-10. **One command to run everything.** A root `pnpm dev` that starts web + api + db.
+10. **One command to run everything.** A root `npm run dev` that starts web + api.
     *Why:* low friction to start working = you actually work.
 11. **Test harness heartbeat.** Install Vitest in both `web` and `api`; write one
-    trivial passing test in each and a root `pnpm test`. *Why:* same idea as the
+    trivial passing test in each and a root `npm test`. *Why:* same idea as the
     `/health` check — prove the testing setup works while there's nothing to test,
     so every later phase can just add tests. See `testing.md` for the full strategy.
 
@@ -71,6 +72,6 @@ a skeleton you trust.
   test of your wiring. Don't skip it.
 
 ## How to know you're done
-`pnpm dev` starts the frontend, backend, and database together, and the frontend
-page shows a live "API OK" pulled from the backend. `pnpm test` runs and the
-heartbeat tests pass. Nothing else — that's success.
+`npm run dev` starts the frontend and backend together, and the frontend page
+shows a live "API OK" pulled from the backend. `npm test` runs and the heartbeat
+tests pass. Nothing else — that's success.

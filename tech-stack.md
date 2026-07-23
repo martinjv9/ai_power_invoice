@@ -6,7 +6,7 @@ of this.
 
 ## Architecture
 Separate frontend and backend, **TypeScript on both sides**, in a monorepo with a
-shared types package (pnpm workspaces or Turborepo). Separation is a deliberate
+shared types package (npm workspaces; pnpm or Turborepo optional later). Separation is a deliberate
 choice to serve the AWS/container learning goals (two deployable services), not a
 requirement of the app itself.
 
