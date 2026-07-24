@@ -6,16 +6,26 @@
     "packages/*",
     "apps/*"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @invoice/api\" \"npm run dev -w @invoice/web\"",
     "test": "npm run test -w @invoice/api && npm run test -w @invoice/web",
     "build": "npm run build -w @invoice/shared && npm run build -w @invoice/api && npm run build -w @invoice/web",
+    "smoke": "npm run smoke -w @invoice/api",
+    "lint": "eslint .",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "concurrently": "^9.1.0",
+    "eslint": "^10.7.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.7.0",
     "prettier": "^3.4.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.65.0"
   }
 }
