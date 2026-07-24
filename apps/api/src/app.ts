@@ -7,8 +7,11 @@ import type { HealthResponse } from "@invoice/shared";
 export function createApp() {
   const app = express();
 
-  // Frontend and backend are separate origins; allow the dev frontend with creds.
-  app.use(cors({ origin: true, credentials: true }));
+  // Frontend and backend are separate origins. Allow ONLY the configured
+  // frontend origin (never reflect arbitrary origins — with credentials that
+  // would let any site ride the session cookie once auth lands in Phase 1).
+  const corsOrigin = process.env.CORS_ORIGIN ?? "http://localhost:5173";
+  app.use(cors({ origin: corsOrigin, credentials: true }));
   app.use(express.json());
 
   app.get("/health", (_req, res) => {

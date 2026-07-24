@@ -10,7 +10,9 @@ describe("App", () => {
       "fetch",
       vi.fn(() =>
         Promise.resolve({
-          json: () => Promise.resolve({ status: "ok", service: "api", time: new Date().toISOString() }),
+          ok: true,
+          json: () =>
+            Promise.resolve({ status: "ok", service: "api", time: new Date().toISOString() }),
         }),
       ),
     );

@@ -11,6 +11,7 @@ and to end in something you can run and see working.
 **Legend:** `[ ]` todo · group = phase. Check items off as you go.
 
 **Guiding principles**
+
 - Build in **vertical slices** (DB → API → UI for one feature) so you always have
   a working app, not half-finished layers.
 - Get the app working **locally first**, then deploy — debug app and infra
@@ -25,9 +26,11 @@ and to end in something you can run and see working.
 ---
 
 ## App Phase 0 — Foundation & scaffolding ✅ DONE
-*Goal: an empty but fully-wired monorepo that runs end-to-end.*
+
+_Goal: an empty but fully-wired monorepo that runs end-to-end._
+
 - [x] Init monorepo (npm workspaces): `apps/web`, `apps/api`, `packages/shared`
-- [x] Shared TypeScript config + Prettier at the root *(ESLint deferred)*
+- [x] Shared TypeScript config + Prettier at the root
 - [x] `packages/shared` for shared types/Zod schemas; wired into both apps (incl. example Client DTOs)
 - [x] Backend skeleton: Express + TypeScript (`createApp` factory; folder convention grows in Phase 1+)
 - [x] Frontend skeleton: React 19 + Vite + TypeScript
@@ -39,14 +42,31 @@ and to end in something you can run and see working.
 - [x] Root scripts: `npm run dev` (api + web together) and `npm test`
 - **Done when:** `npm run dev` starts everything and the frontend shows a live "API OK". ✅ met
 
+**Phase 0 follow-up (post-review hardening)** — added after a repo review:
+
+- [x] Fix production build: api bundled with **tsup** (plain `tsc` emitted ESM
+      Node couldn't run — no `.js` extensions, and `@invoice/shared` ships raw TS).
+      `npm start` now works on build output.
+- [x] `npm run smoke` — boots the _built_ api and hits `/health`, so dev tooling
+      (tsx/vitest) can never again hide a broken production build
+- [x] ESLint (flat config: typescript-eslint + react-hooks) — un-deferred; root `npm run lint`
+- [x] Minimal CI (GitHub Actions): lint → test → build → smoke on every push/PR.
+      _(Deploy automation still lands in Infra Phase C — this is the test gate only.)_
+- [x] CORS locked to an explicit frontend origin via `CORS_ORIGIN` env (was: reflect any origin)
+- [x] Node version pinned (`.nvmrc` + `engines`); README quickstart written
+- [x] Postgres healthcheck in docker-compose (lets later migrate/seed scripts wait on readiness)
+
 ## App Phase 1 — Auth & app shell
-*Goal: staff can log in; protected routes work.*
+
+_Goal: staff can log in; protected routes work._
+
 - [ ] Prisma `User` model + migration; seed script for a first admin user
 - [ ] Password hashing (argon2 or bcrypt)
 - [ ] Sessions table + `express-session` with a Postgres store
 - [ ] `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
 - [ ] Auth middleware to protect routes; return 401 when unauthenticated
-- [ ] CORS configured with credentials for the separate frontend origin
+- [ ] CORS: confirm the `CORS_ORIGIN` allowlist + credentials setup works with the
+      session cookie (groundwork done in Phase 0 follow-up — never reflect arbitrary origins)
 - [ ] `httpOnly`, `SameSite` session cookie set correctly
 - [ ] Frontend: login page, auth context/provider, `useAuth` hook
 - [ ] Frontend: protected-route wrapper + redirect to login
@@ -55,7 +75,9 @@ and to end in something you can run and see working.
 - **Done when:** you log in, land on an empty dashboard, refresh keeps you in, logout works.
 
 ## App Phase 2 — Clients & Projects (core data)
-*Goal: manage the people and jobs the documents attach to.*
+
+_Goal: manage the people and jobs the documents attach to._
+
 - [ ] Prisma `Client` model (billing address + contact) + migration
 - [ ] Prisma `Project` model (job-site address, status, `created_by`) + migration
 - [ ] Zod schemas in `packages/shared` for client + project
@@ -68,7 +90,9 @@ and to end in something you can run and see working.
 - **Done when:** you can create a client, add projects at different addresses, edit/search them.
 
 ## App Phase 3 — Estimates & Invoices (documents)
-*Goal: the heart of the app — build documents with line items.*
+
+_Goal: the heart of the app — build documents with line items._
+
 - [ ] Prisma `Document` (type estimate|invoice, status, dates, totals) + migration
 - [ ] Prisma `LineItem` (structured rows) + migration
 - [ ] Sequential document-numbering logic (safe against races)
@@ -82,7 +106,9 @@ and to end in something you can run and see working.
 - **Done when:** you create an estimate, add line items, convert it to a numbered invoice.
 
 ## App Phase 4 — AI features
-*Goal: AI assists on line items and wording.*
+
+_Goal: AI assists on line items and wording._
+
 - [ ] Anthropic SDK integrated in the backend; API key via env/secrets
 - [ ] `POST /ai/line-items` — plain-language description → structured line items (tool/structured output)
 - [ ] `POST /ai/refine` — clean up / professionalize description text
@@ -93,7 +119,9 @@ and to end in something you can run and see working.
 - **Done when:** you type a job description and get editable line items you can accept into a document.
 
 ## App Phase 5 — PDF & Email
-*Goal: turn a document into a PDF and send it.*
+
+_Goal: turn a document into a PDF and send it._
+
 - [ ] Server-side PDF generation (branded template: Bill To + Job Site, line items, totals)
 - [ ] PDF preview + download endpoint
 - [ ] Company/branding config (logo, business info, terms) for the header
@@ -104,7 +132,9 @@ and to end in something you can run and see working.
 - **Done when:** you generate a real PDF and email it to yourself as a test client.
 
 ## App Phase 6 — Payments & Dashboard
-*Goal: track money and surface what matters.*
+
+_Goal: track money and surface what matters._
+
 - [ ] Prisma `Payment` model (amount, date, method, note) + migration
 - [ ] Payment API: record full/partial payment against an invoice
 - [ ] Derived outstanding balance + auto status (paid/partial)
@@ -115,7 +145,9 @@ and to end in something you can run and see working.
 - **Done when:** recording a partial payment updates the balance and the dashboard reflects it.
 
 ## App Phase 7 — Search & filtering
-*Goal: find anything fast.*
+
+_Goal: find anything fast._
+
 - [ ] Postgres full-text / trigram indexes on job detail + address columns
 - [ ] Structured filter API (dates, amount/balance ranges, status, type, client, staff, payment method)
 - [ ] Global search bar (client, number, address, job detail)
@@ -125,7 +157,9 @@ and to end in something you can run and see working.
 - **Done when:** you can filter to "overdue invoices over $2k, oldest first" in a couple clicks.
 
 ## App Phase 8 — Hardening (pre-deploy)
-*Goal: safe enough to run for real.*
+
+_Goal: safe enough to run for real._
+
 - [ ] Review every route for auth + input validation
 - [ ] Rate-limit login; basic security headers
 - [ ] Ensure `created_by` recorded on all documents/projects
@@ -138,7 +172,9 @@ and to end in something you can run and see working.
 ---
 
 ## Infra Phase A — AWS: EC2, RDS, networking, IaC
-*(Can start after App Phase 3. Builds: managed data + networking + Terraform.)*
+
+_(Can start after App Phase 3. Builds: managed data + networking + Terraform.)_
+
 - [ ] AWS account hygiene: non-root IAM user, MFA, **Budgets alarm**
 - [ ] Terraform project skeleton (state backend, providers)
 - [ ] VPC, subnets, security groups, IAM roles in Terraform
@@ -148,6 +184,7 @@ and to end in something you can run and see working.
 - **Done when:** the app is reachable on AWS, backed by RDS, all provisioned by Terraform.
 
 ## Infra Phase B — Containers
+
 - [ ] Dockerfile for backend (and optionally frontend)
 - [ ] Local `docker compose` parity with the cloud setup
 - [ ] ECR repositories; push images
@@ -155,12 +192,17 @@ and to end in something you can run and see working.
 - **Done when:** the app runs as containers, images live in ECR.
 
 ## Infra Phase C — CI/CD
+
+_(A test-only CI workflow — lint/test/build/smoke — already exists from the Phase 0
+follow-up. This phase extends it with image build + deploy; don't start a new one.)_
+
 - [ ] GitHub Actions: on push → run tests → build image → push to ECR (tests gate the deploy)
 - [ ] Automated deploy step (replace running container)
 - [ ] Retire manual SSH deploys
 - **Done when:** merging to main ships automatically.
 
 ## Infra Phase D — Orchestration (graduate)
+
 - [ ] ECS cluster (EC2 launch type) via Terraform; run the services
 - [ ] Move behind a load balancer; wire logging to CloudWatch
 - [ ] Switch launch type to **Fargate**; drop server management
@@ -169,6 +211,7 @@ and to end in something you can run and see working.
 ---
 
 ## Suggested milestones
+
 1. **Skeleton runs** (App 0) — proves the whole stack is wired.
 2. **Login works** (App 1).
 3. **Clients + projects** (App 2).

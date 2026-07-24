@@ -1,10 +1,11 @@
 # Testing Strategy
 
 A cross-cutting guide referenced by every phase. The implementation plan puts a
-small testing task in each phase; this explains *how* to think about testing, what
+small testing task in each phase; this explains _how_ to think about testing, what
 to write, and which tools to use. Read it once, then refer back per phase.
 
 ## Why we test (the payoff)
+
 - **Confidence to change code without fear.** You build across ~12 phases; tests
   re-check the old code every time you touch something, so adding payments doesn't
   silently break invoice numbering.
@@ -18,22 +19,28 @@ to write, and which tools to use. Read it once, then refer back per phase.
   fail (see `infra-c-cicd.md`).
 
 ## The test pyramid (what to write, how much)
+
 Lots of small fast tests at the bottom, few slow ones at the top.
 
-- **Unit tests** *(most, fastest)* — pure logic in isolation: tax/totals, invoice
+- **Unit tests** _(most, fastest)_ — pure logic in isolation: tax/totals, invoice
   numbering, status-transition rules, DTO mappers, aging buckets. **Best value per
   effort — start here.**
-- **Integration tests** *(high value here)* — an API route hitting a test database:
+- **Integration tests** _(high value here)_ — an API route hitting a test database:
   "create client returns the right DTO," "auth middleware rejects a logged-out
   request," "recording a payment updates the balance." Most real CRUD bugs live here.
-- **Component tests** *(some)* — React forms validate, lists render.
-- **E2E tests** *(few)* — a real browser doing a full journey (log in → build invoice
+- **Component tests** _(some)_ — React forms validate, lists render.
+- **E2E tests** _(few)_ — a real browser doing a full journey (log in → build invoice
   → send). Powerful but slow; reserve for a couple of critical happy paths.
+- **Build smoke check** _(one, special)_ — `npm run smoke` boots the _compiled_ api
+  (`node dist/index.js`) and hits `/health`. It exists because everything else in
+  the pyramid runs through dev tooling that transpiles on the fly and can't catch
+  a build that only breaks under plain Node. CI runs it after every build.
 
 **Don't chase 100% coverage.** Cover money, numbering, auth, and mappers well; skip
 trivial glue code. Coverage is a tool, not a goal.
 
 ## Tooling (fits this stack)
+
 - **Vitest** — test runner; pairs naturally with Vite + TypeScript. One tool for
   both `web` and `api`.
 - **Supertest** — fire fake HTTP requests at the Express API in integration tests.
@@ -42,6 +49,7 @@ trivial glue code. Coverage is a tool, not a goal.
 - **Playwright** — E2E browser tests, added late (Phase 8).
 
 ## How testing maps to each phase
+
 - **Phase 0** — set up Vitest + a heartbeat test in each package (proves the harness).
 - **Phase 1** — auth middleware rejects logged-out requests; login/session happy path.
 - **Phase 2** — client/project CRUD; DTO mapper leaks no internal fields.
@@ -53,8 +61,9 @@ trivial glue code. Coverage is a tool, not a goal.
 - **Phase 8** — coverage audit (fill gaps) + a few Playwright E2E smoke tests.
 
 ## Key habits
+
 - **Mock external services** (the AI API, the email provider) in tests — don't make
-  real network calls. They're slow, cost money, and make tests flaky. Test *your*
+  real network calls. They're slow, cost money, and make tests flaky. Test _your_
   code, not theirs.
 - **Use a separate test database** for integration tests; reset it between runs so
   tests don't depend on each other's data.
@@ -64,6 +73,7 @@ trivial glue code. Coverage is a tool, not a goal.
   before a client did.
 
 ## Common pitfalls
+
 - **Testing everything or nothing** — aim for the middle; cover the risky parts well.
 - **Live API calls in tests** — always mock the AI and email providers.
 - **Shared state between tests** — reset the DB and mocks so order doesn't matter.

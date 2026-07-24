@@ -1,17 +1,20 @@
 # Infra Phase A — AWS: EC2, RDS, Networking, IaC
 
 ## What this phase is
+
 Taking the app you built locally and running it on AWS: a server (EC2), a managed
 database (RDS Postgres), proper networking (VPC), and — crucially — defining all of
 it as code with Terraform instead of clicking around the AWS console.
 
 ## Why it matters
+
 This is where cloud learning gets real. You already know EC2 from your LAMP days;
-here you level it up with a *managed* database, *proper* networking and permissions,
-and *infrastructure-as-code* — the three things that separate "I ran a server once"
+here you level it up with a _managed_ database, _proper_ networking and permissions,
+and _infrastructure-as-code_ — the three things that separate "I ran a server once"
 from "I can build cloud infrastructure."
 
 ## Key concepts
+
 - **EC2 (Elastic Compute Cloud):** a virtual server you rent from AWS. You already
   know this one.
 - **RDS (Relational Database Service):** a managed Postgres database. AWS handles
@@ -33,33 +36,36 @@ from "I can build cloud infrastructure."
   (e.g. in S3) so it isn't lost or conflicting.
 
 ## Task by task
+
 1. **Account hygiene.** Create a non-root IAM user, turn on MFA, and set a
-   **Budgets alarm**. *Why:* the root account is dangerous to use daily, and the
-   budget alarm is your insurance against a surprise bill — do this *first*.
-2. **Terraform skeleton.** Providers + remote state backend (S3). *Why:* a safe,
+   **Budgets alarm**. _Why:_ the root account is dangerous to use daily, and the
+   budget alarm is your insurance against a surprise bill — do this _first_.
+2. **Terraform skeleton.** Providers + remote state backend (S3). _Why:_ a safe,
    shareable home for your infra definitions before you build anything.
-3. **VPC, subnets, security groups, IAM roles in Terraform.** *Why:* the private
+3. **VPC, subnets, security groups, IAM roles in Terraform.** _Why:_ the private
    network and firewall rules everything else sits inside; defining them in code
    makes the whole stack reproducible.
 4. **RDS Postgres via Terraform.** In a private subnet, reachable only by the app.
-   *Why:* your database should never be exposed to the public internet.
+   _Why:_ your database should never be exposed to the public internet.
 5. **EC2 via Terraform + deploy the app.** Run the backend as a Node process; serve
-   the built frontend (from the backend or S3/CloudFront). *Why:* your app, now in
+   the built frontend (from the backend or S3/CloudFront). _Why:_ your app, now in
    the cloud, provisioned reproducibly.
-6. **Point the app at RDS via env/secrets.** *Why:* the app shouldn't change between
+6. **Point the app at RDS via env/secrets.** _Why:_ the app shouldn't change between
    laptop and cloud — only its config (the database URL) does.
 
 ## Common pitfalls
+
 - **Using the root account for everything:** create an IAM user; keep root locked
   away with MFA.
 - **No budget alarm:** the classic beginner $200 surprise. Set it on day one.
 - **Public database:** never put RDS in a public subnet. App reaches it privately.
 - **Clicking in the console then wondering why Terraform "forgets":** once you go
-  IaC, make *all* changes through Terraform, or its state drifts from reality.
+  IaC, make _all_ changes through Terraform, or its state drifts from reality.
 - **Committing secrets or state:** Terraform state can contain secrets — store it in
   S3, not git.
 
 ## How to know you're done
+
 Your app is reachable on AWS, backed by an RDS Postgres in a private subnet, with
 networking and permissions locked down — and you can tear it all down and recreate
 it from your Terraform code alone.

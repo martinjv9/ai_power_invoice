@@ -1,18 +1,21 @@
 # Infra Phase B — Containers
 
 ## What this phase is
+
 Packaging your app into **containers** (with Docker) so it runs the same way
 everywhere, and storing those container images in AWS's registry (ECR). You start by
 running the containers on the EC2 host you already have.
 
 ## Why it matters
+
 This is the biggest modern skill gap from your LAMP/EC2 background. "It works on my
 machine" disappears when the app ships as a container that carries its own
 environment. It's also the prerequisite for the orchestration (ECS/Fargate) you'll
 graduate to next.
 
 ## Key concepts
-- **Container:** a lightweight, isolated package containing your app *and*
+
+- **Container:** a lightweight, isolated package containing your app _and_
   everything it needs to run (runtime, libraries, config). It runs identically on
   your laptop, EC2, or Fargate.
 - **Image vs container:** an **image** is the blueprint (built once); a **container**
@@ -28,18 +31,20 @@ graduate to next.
   maybe frontend). Coordinating multiple containers is what Phase D's ECS handles.
 
 ## Task by task
-1. **Dockerfile for the backend** (and optionally frontend). *Why:* defines exactly
+
+1. **Dockerfile for the backend** (and optionally frontend). _Why:_ defines exactly
    how your app is built and run, removing "works on my machine" drift.
 2. **Local `docker compose` parity.** Run your containers + Postgres locally the same
-   way they'll run in the cloud. *Why:* debug container issues on your laptop, not on
+   way they'll run in the cloud. _Why:_ debug container issues on your laptop, not on
    a server.
-3. **ECR repositories + push images.** *Why:* your cloud hosts need somewhere trusted
+3. **ECR repositories + push images.** _Why:_ your cloud hosts need somewhere trusted
    to pull images from.
-4. **Run the container(s) on the EC2 host.** *Why:* a gentle first step — same server
+4. **Run the container(s) on the EC2 host.** _Why:_ a gentle first step — same server
    you know, now running containers instead of a bare Node process. Bridges toward
    ECS without a big leap.
 
 ## Common pitfalls
+
 - **Huge images:** copying `node_modules` or build junk bloats images and slows
   deploys. Use a `.dockerignore` and multi-stage builds (build in one stage, copy
   only the result into a slim final image).
@@ -52,6 +57,7 @@ graduate to next.
   catch these gaps early.
 
 ## How to know you're done
+
 Your app runs as one or more containers, the images live in ECR, and the same
 containers run both locally (via compose) and on your EC2 host — behaving
 identically.

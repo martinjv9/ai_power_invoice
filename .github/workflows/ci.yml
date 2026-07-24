@@ -1,0 +1,37 @@
+# Minimal CI: lint, test, build, and smoke-check the built api on every push/PR.
+# This is deliberately test-only — deploy automation (images → ECR → deploy) is
+# added later in Infra Phase C and extends this workflow rather than replacing it.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Boots the compiled api (`node dist/index.js`) and hits /health. Catches
+      # production-only breakage that dev tooling (tsx/vitest) papers over.
+      - name: Smoke-check built api
+        run: npm run smoke
