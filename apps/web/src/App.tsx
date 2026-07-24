@@ -10,7 +10,11 @@ export default function App() {
 
   useEffect(() => {
     fetch("/api/health")
-      .then((r) => r.json())
+      .then((r) => {
+        // fetch only rejects on network failure — an HTTP error still resolves.
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((data: HealthResponse) => setHealth(data))
       .catch(() => setError(true));
   }, []);
