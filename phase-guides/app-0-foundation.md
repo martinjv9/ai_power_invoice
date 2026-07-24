@@ -1,18 +1,21 @@
 # App Phase 0 — Foundation & Scaffolding
 
 ## What this phase is
+
 Setting up an empty project that already has all its pieces wired together: a
 frontend, a backend, a shared code area, a database, and a way to run them all at
 once. No features yet — just proof that the plumbing works end to end.
 
 ## Why it matters
+
 The single most demoralizing way to build a project is to write a bunch of
-features and *then* discover the frontend can't talk to the backend, or the
+features and _then_ discover the frontend can't talk to the backend, or the
 database won't connect. Phase 0 flushes out all those wiring problems while there's
 nothing to break. When it's done, every later phase is "just" adding features onto
 a skeleton you trust.
 
 ## Key concepts
+
 - **Monorepo**: one repository holding multiple projects (our `web`, `api`, and
   `shared`) instead of three separate repos. Easier to share code and keep
   versions in sync.
@@ -30,48 +33,62 @@ a skeleton you trust.
   out of the code so they can differ between your laptop and production.
 
 ## Task by task
+
 1. **Init the monorepo.** Create the folder layout `apps/web`, `apps/api`,
-   `packages/shared`. *Why:* clear separation — UI, server, and shared types each
-   have a home. The shared package is where types used by *both* sides live.
+   `packages/shared`. _Why:_ clear separation — UI, server, and shared types each
+   have a home. The shared package is where types used by _both_ sides live.
 2. **Root ESLint/Prettier/tsconfig.** One set of formatting + linting rules for the
-   whole repo. *Why:* consistent code from day one is far easier than retrofitting.
+   whole repo. _Why:_ consistent code from day one is far easier than retrofitting.
 3. **`packages/shared`.** Put a throwaway shared type here and import it from both
-   apps. *Why:* proves the sharing mechanism works — this is what keeps frontend and
+   apps. _Why:_ proves the sharing mechanism works — this is what keeps frontend and
    backend types in sync later.
 4. **Backend skeleton.** Express + TypeScript with the folder convention
-   routes → controllers → services → prisma. *Why:* Express gives you no structure,
+   routes → controllers → services → prisma. _Why:_ Express gives you no structure,
    so imposing one now prevents a spaghetti pile of route handlers later.
    (routes = URLs, controllers = handle the request/response, services = business
    logic, prisma = database access.)
-5. **Frontend skeleton.** React + Vite. *Why:* Vite gives instant dev reloads and a
+5. **Frontend skeleton.** React + Vite. _Why:_ Vite gives instant dev reloads and a
    simple build; perfect for a single-page admin app.
-6. **Tailwind + shadcn/ui.** Install and theme them. *Why:* set up styling before
+6. **Tailwind + shadcn/ui.** Install and theme them. _Why:_ set up styling before
    building screens so components look right immediately.
-7. **Prisma + local Postgres.** Add Prisma; run Postgres via Docker Compose. *Why:*
+7. **Prisma + local Postgres.** Add Prisma; run Postgres via Docker Compose. _Why:_
    a real database locally means no surprises when you deploy to a real one.
 8. **`.env` handling.** Load env vars in both apps; commit a `.env.example`
-   listing required vars (no secrets). *Why:* teammates (and future you) know what
+   listing required vars (no secrets). _Why:_ teammates (and future you) know what
    config is needed without leaking real values.
 9. **`/health` end to end.** Backend returns `{status:"ok"}`; frontend fetches it
-   and shows it. *Why:* this single request proves the browser → API → (and soon
+   and shows it. _Why:_ this single request proves the browser → API → (and soon
    DB) path works. It's the heartbeat of the whole setup.
 10. **One command to run everything.** A root `npm run dev` that starts web + api.
-    *Why:* low friction to start working = you actually work.
+    _Why:_ low friction to start working = you actually work.
 11. **Test harness heartbeat.** Install Vitest in both `web` and `api`; write one
-    trivial passing test in each and a root `npm test`. *Why:* same idea as the
+    trivial passing test in each and a root `npm test`. _Why:_ same idea as the
     `/health` check — prove the testing setup works while there's nothing to test,
     so every later phase can just add tests. See `testing.md` for the full strategy.
 
 ## Common pitfalls
+
+- **Dev tooling hides a broken production build.** `tsx` (dev) and Vitest (tests)
+  transpile TypeScript on the fly, so the api can run perfectly all through
+  development while `npm run build && npm start` is broken — and you only find
+  out on deploy day. This actually happened here: `tsc` emitted ESM imports
+  without `.js` extensions (Node requires them), and `@invoice/shared` ships raw
+  `.ts` that plain Node can't load. The fix was bundling the api with **tsup**
+  (which inlines `shared` and rewrites imports) plus a `npm run smoke` script
+  that boots the _built_ server and hits `/health` — run in CI after every build
+  so this class of bug can't come back silently.
 - **CORS confusion later:** frontend (e.g. `localhost:5173`) and backend
-  (`localhost:3000`) are *different origins*. You'll configure CORS in Phase 1 —
-  just know now that they're separate.
+  (`localhost:3000`) are _different origins_. The api already allows only the
+  origin in `CORS_ORIGIN` (with credentials); Phase 1 builds on this — never
+  loosen it to "allow any origin," which with credentials would let any website
+  ride your users' session cookies.
 - **Committing secrets:** never commit a real `.env`. Add it to `.gitignore`;
   commit only `.env.example`.
 - **Skipping the health check:** it feels pointless, but it's the cheapest possible
   test of your wiring. Don't skip it.
 
 ## How to know you're done
+
 `npm run dev` starts the frontend and backend together, and the frontend page
 shows a live "API OK" pulled from the backend. `npm test` runs and the heartbeat
 tests pass. Nothing else — that's success.

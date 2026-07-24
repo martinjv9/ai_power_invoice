@@ -1,17 +1,20 @@
 # Infra Phase C — CI/CD
 
 ## What this phase is
+
 Automating the boring, error-prone deploy dance: when you push code, a pipeline
 builds a fresh container image, pushes it to ECR, and updates the running app — no
 manual SSH-ing into servers.
 
 ## Why it matters
+
 Manual deploys are slow and easy to get wrong (forgot a step, deployed the wrong
 branch, broke prod at 11pm). Automating them makes shipping routine and safe, and
 CI/CD is a skill every professional team expects. It's also what makes frequent,
 low-stress releases possible.
 
 ## Key concepts
+
 - **CI (Continuous Integration):** automatically building and testing your code
   every time you push, so problems surface immediately instead of piling up.
 - **CD (Continuous Delivery/Deployment):** automatically shipping that build to your
@@ -26,15 +29,22 @@ low-stress releases possible.
 - **Artifact:** the thing your build produces — here, the container image that gets
   pushed to ECR and then deployed.
 
+> **Head start:** the CI half already exists. `.github/workflows/ci.yml` (added in
+> the Phase 0 follow-up) runs lint → test → build → smoke on every push and PR.
+> This phase is about the CD half — extend that workflow with image build, ECR
+> push, and deploy steps rather than starting a new one.
+
 ## Task by task
+
 1. **GitHub Actions: build + push on push.** On a push to main, build the image and
-   push it to ECR. *Why:* every merge produces a ready-to-run image automatically.
+   push it to ECR. _Why:_ every merge produces a ready-to-run image automatically.
 2. **Automated deploy step.** Update the running container(s) to the new image.
-   *Why:* closes the loop — code merged becomes code running, hands-off.
-3. **Retire manual SSH deploys.** *Why:* if deploys only happen through the pipeline,
+   _Why:_ closes the loop — code merged becomes code running, hands-off.
+3. **Retire manual SSH deploys.** _Why:_ if deploys only happen through the pipeline,
    they're consistent, logged, and repeatable — no more "what did I run last time?"
 
 ## Common pitfalls
+
 - **Long-lived AWS keys in GitHub:** prefer OIDC (short-lived, auto-expiring
   credentials). If you must use keys, scope them tightly and rotate them.
 - **No tests in the pipeline:** at least run your critical-path tests before
@@ -47,6 +57,7 @@ low-stress releases possible.
   pipeline stays quick and you actually use it.
 
 ## How to know you're done
+
 You push to main, and without touching a server, a pipeline builds a new image,
 pushes it to ECR, and the running app updates to it — with tests gating the deploy
 and a clear way to roll back.
