@@ -1,5 +1,5 @@
 // Prisma schema. Models are added starting in App Phase 1 (User), then Phase 2+
-// (Client, Project, Document, LineItem, Payment). Phase 0 just wires Prisma up.
+// (Client, Project, Document, LineItem, Payment).
 
 generator client {
   provider = "prisma-client-js"
@@ -8,4 +8,17 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// Staff login accounts (admin-only app; clients never log in). The password is
+// never stored — only its bcrypt hash. The sessions table is NOT modeled here:
+// it's infrastructure owned by connect-pg-simple (createTableIfMissing), not
+// domain data.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
