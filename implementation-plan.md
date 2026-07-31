@@ -56,23 +56,29 @@ _Goal: an empty but fully-wired monorepo that runs end-to-end._
 - [x] Node version pinned (`.nvmrc` + `engines`); README quickstart written
 - [x] Postgres healthcheck in docker-compose (lets later migrate/seed scripts wait on readiness)
 
-## App Phase 1 — Auth & app shell
+## App Phase 1 — Auth & app shell ✅ DONE
 
 _Goal: staff can log in; protected routes work._
 
-- [ ] Prisma `User` model + migration; seed script for a first admin user
-- [ ] Password hashing (argon2 or bcrypt)
-- [ ] Sessions table + `express-session` with a Postgres store
-- [ ] `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
-- [ ] Auth middleware to protect routes; return 401 when unauthenticated
-- [ ] CORS: confirm the `CORS_ORIGIN` allowlist + credentials setup works with the
-      session cookie (groundwork done in Phase 0 follow-up — never reflect arbitrary origins)
-- [ ] `httpOnly`, `SameSite` session cookie set correctly
-- [ ] Frontend: login page, auth context/provider, `useAuth` hook
-- [ ] Frontend: protected-route wrapper + redirect to login
-- [ ] App shell: nav/sidebar layout, logout button, current-user display
-- [ ] Tests: auth middleware rejects logged-out requests; login + session happy path
-- **Done when:** you log in, land on an empty dashboard, refresh keeps you in, logout works.
+- [x] Prisma `User` model + migration; seed script for a first admin user (`npm run db:seed`)
+- [x] Password hashing (bcrypt, cost 12; timing-equalized login so unknown emails
+      aren't detectable)
+- [x] Sessions table + `express-session` with a Postgres store (`connect-pg-simple`;
+      the store owns its table — deliberately outside the Prisma schema)
+- [x] `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` (+ session
+      regeneration on login against fixation; central JSON error handler)
+- [x] Auth middleware to protect routes; return 401 when unauthenticated
+- [x] CORS: `CORS_ORIGIN` allowlist + credentials confirmed working with the
+      session cookie (never reflect arbitrary origins)
+- [x] `httpOnly`, `SameSite=lax` session cookie; `secure` + `trust proxy` in
+      production; boot refuses to start in production without `SESSION_SECRET`
+- [x] Frontend: login page, auth context/provider, `useAuth` hook
+- [x] Frontend: protected-route wrapper + redirect to login (returns you to the
+      page you were headed to after login)
+- [x] App shell: nav/sidebar layout, logout button, current-user display
+- [x] Tests: auth middleware rejects logged-out requests; login + session happy path
+      (integration tests against real Postgres, in CI too via a service container)
+- **Done when:** you log in, land on an empty dashboard, refresh keeps you in, logout works. ✅ met
 
 ## App Phase 2 — Clients & Projects (core data)
 

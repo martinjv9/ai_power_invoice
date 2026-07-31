@@ -5,8 +5,9 @@ projects, build estimates and invoices (with AI-assisted line items and
 wording), generate branded PDFs, email them to clients, and track payments and
 outstanding balances.
 
-**Status:** App Phase 0 (foundation) complete — the monorepo skeleton runs end
-to end. Features land phase by phase; see the docs below.
+**Status:** App Phase 1 (auth & app shell) complete — staff log in with
+cookie + database sessions; the app shell and protected routes are in place.
+Next up: clients & projects (Phase 2). See the docs below.
 
 ## Docs
 
@@ -36,11 +37,16 @@ packages/shared  Types + Zod DTO schemas used by both sides
 npm install                                # install all workspaces
 npm run db:up                              # start Postgres (Docker)
 cp apps/api/.env.example apps/api/.env     # local env (defaults work as-is)
+npm run prisma:migrate -w @invoice/api     # create/update database tables
+npm run db:seed -w @invoice/api            # create the first admin login
 npm run dev                                # api on :3000, web on :5173
 ```
 
-Open <http://localhost:5173> — you should see a live "API OK" badge (the
-frontend calling the backend `/health` through the Vite proxy).
+Open <http://localhost:5173> and sign in with the seeded admin —
+`admin@example.com` / `change-me-now` by default (set `ADMIN_EMAIL` /
+`ADMIN_PASSWORD` in `apps/api/.env` before seeding to use your own). The
+dashboard shows a live "API OK" badge (the frontend calling the backend
+`/health` through the Vite proxy).
 
 ## Scripts (root)
 
