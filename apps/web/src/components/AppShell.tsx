@@ -2,11 +2,10 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { cn } from "@/lib/utils";
 
-// Placeholder items become real links as their phases land (Clients: Phase 2,
-// Documents: Phase 3).
+// Placeholder items become real links as their phases land (Documents: Phase 3).
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", enabled: true },
-  { to: "/clients", label: "Clients", enabled: false },
+  { to: "/clients", label: "Clients", enabled: true },
   { to: "/documents", label: "Documents", enabled: false },
 ];
 

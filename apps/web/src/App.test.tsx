@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./auth/AuthContext";
 import App from "./App";
 
@@ -22,14 +23,26 @@ function mockFetch(routes: Record<string, { status: number; body?: unknown }>) {
 }
 
 function renderApp(initialPath = "/") {
+  // Fresh QueryClient per test — no cached data bleeding between tests, and
+  // no retries so failures surface immediately.
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </QueryClientProvider>
     </MemoryRouter>,
   );
 }
+
+const loggedIn = {
+  "/api/auth/me": {
+    status: 200,
+    body: { id: "u1", email: "admin@example.com", name: "Admin" },
+  },
+};
 
 describe("App", () => {
   beforeEach(() => {
@@ -45,10 +58,7 @@ describe("App", () => {
 
   it("shows the app shell and dashboard when logged in", async () => {
     mockFetch({
-      "/api/auth/me": {
-        status: 200,
-        body: { id: "u1", email: "admin@example.com", name: "Admin" },
-      },
+      ...loggedIn,
       "/api/health": {
         status: 200,
         body: { status: "ok", service: "api", time: new Date().toISOString() },
@@ -58,5 +68,35 @@ describe("App", () => {
     expect(await screen.findByText(/welcome back, admin/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
     expect(await screen.findByText(/API OK/i)).toBeInTheDocument();
+  });
+
+  it("lists clients on the clients page", async () => {
+    mockFetch({
+      ...loggedIn,
+      "/api/clients": {
+        status: 200,
+        body: [
+          {
+            id: "c1",
+            name: "Acme Builders",
+            contactPerson: "Pat Foreman",
+            email: "pat@acme.test",
+            phone: null,
+            billingAddress: "1 Billing Way",
+          },
+        ],
+      },
+    });
+    renderApp("/clients");
+    expect(await screen.findByText("Acme Builders")).toBeInTheDocument();
+    expect(screen.getByText("Pat Foreman")).toBeInTheDocument();
+    // Optional phone renders as a dash, not "null".
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+
+  it("shows the empty state when there are no clients", async () => {
+    mockFetch({ ...loggedIn, "/api/clients": { status: 200, body: [] } });
+    renderApp("/clients");
+    expect(await screen.findByText(/no clients yet/i)).toBeInTheDocument();
   });
 });
