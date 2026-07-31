@@ -80,20 +80,26 @@ _Goal: staff can log in; protected routes work._
       (integration tests against real Postgres, in CI too via a service container)
 - **Done when:** you log in, land on an empty dashboard, refresh keeps you in, logout works. ✅ met
 
-## App Phase 2 — Clients & Projects (core data)
+## App Phase 2 — Clients & Projects (core data) ✅ DONE
 
 _Goal: manage the people and jobs the documents attach to._
 
-- [ ] Prisma `Client` model (billing address + contact) + migration
-- [ ] Prisma `Project` model (job-site address, status, `created_by`) + migration
-- [ ] Zod schemas in `packages/shared` for client + project
-- [ ] Client CRUD API (create/read/update/list) with validation
-- [ ] Project CRUD API (nested under client)
-- [ ] Client list + search UI (table, create/edit form, detail view)
-- [ ] Project list + form UI under a client (with job-site address)
-- [ ] Basic client search (name/contact) wired to the list
-- [ ] Tests: client/project CRUD endpoints; DTO mapper leaks no internal fields
-- **Done when:** you can create a client, add projects at different addresses, edit/search them.
+- [x] Prisma `Client` model (billing address + contact) + migration
+- [x] Prisma `Project` model (job-site address, status, `created_by`) + migration
+      (also: `Session` modeled in Prisma so the store's table no longer looks
+      like schema drift to `prisma migrate dev`)
+- [x] Zod schemas in `packages/shared` for client + project (create/update/response)
+- [x] Client CRUD API (create/read/update/list) with validation — no DELETE on
+      purpose; the archival policy is decided once documents reference clients
+- [x] Project CRUD API (nested under client: `/clients/:clientId/projects`;
+      `created_by` stamped from the session, never from the request body)
+- [x] Client list + search UI (table, create/edit form, detail view) —
+      TanStack Query introduced here for data fetching/invalidation
+- [x] Project list + form UI under a client (with job-site address + status badge)
+- [x] Basic client search (name/contact, case-insensitive) wired to the list
+- [x] Tests: client/project CRUD endpoints; DTO mapper leaks no internal fields
+      (exact-key assertion on the response shape)
+- **Done when:** you can create a client, add projects at different addresses, edit/search them. ✅ met
 
 ## App Phase 3 — Estimates & Invoices (documents)
 

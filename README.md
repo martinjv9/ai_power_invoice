@@ -5,9 +5,9 @@ projects, build estimates and invoices (with AI-assisted line items and
 wording), generate branded PDFs, email them to clients, and track payments and
 outstanding balances.
 
-**Status:** App Phase 1 (auth & app shell) complete — staff log in with
-cookie + database sessions; the app shell and protected routes are in place.
-Next up: clients & projects (Phase 2). See the docs below.
+**Status:** App Phase 2 (clients & projects) complete — clients with billing
+addresses, projects with per-site job addresses, search, and CRUD behind the
+staff login. Next up: estimates & invoices (Phase 3). See the docs below.
 
 ## Docs
 
