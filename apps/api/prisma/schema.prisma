@@ -10,15 +10,68 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Login sessions, in the exact shape connect-pg-simple expects. Modeled here
+// (rather than letting the store auto-create it) so `prisma migrate dev`
+// doesn't see an unknown table and flag schema drift on every migration.
+model Session {
+  sid    String   @id
+  sess   Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+  @@map("session")
+}
+
 // Staff login accounts (admin-only app; clients never log in). The password is
-// never stored — only its bcrypt hash. The sessions table is NOT modeled here:
-// it's infrastructure owned by connect-pg-simple (createTableIfMissing), not
-// domain data.
+// never stored — only its bcrypt hash.
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   name         String
   passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  projects     Project[]
+}
+
+// The people we bill. One billing address per client; job-site addresses live
+// on each Project (a client can have many projects at different sites).
+model Client {
+  id             String    @id @default(cuid())
+  name           String
+  contactPerson  String
+  email          String
+  phone          String?
+  billingAddress String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  projects       Project[]
+
+  // Phase 7 replaces basic contains-search with proper indexes; these cover
+  // the Phase 2 name/contact lookups in the meantime.
+  @@index([name])
+  @@index([contactPerson])
+}
+
+enum ProjectStatus {
+  active
+  completed
+  on_hold
+}
+
+// A job for a client at a specific site. Documents (Phase 3) attach here.
+model Project {
+  id             String        @id @default(cuid())
+  clientId       String
+  client         Client        @relation(fields: [clientId], references: [id])
+  description    String
+  status         ProjectStatus @default(active)
+  notes          String?
+  jobSiteAddress String
+  createdById    String
+  createdBy      User          @relation(fields: [createdById], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([clientId])
 }

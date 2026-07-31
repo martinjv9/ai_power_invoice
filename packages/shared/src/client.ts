@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-// Example of the DTO pattern we'll use everywhere (see phase-guides/app-2 + the
-// DTO discussion). The Prisma DB model stays in `api`; only these safe shapes
-// cross to the frontend.
+// The DTO pattern used everywhere: the Prisma DB model stays in `api`; only
+// these safe shapes cross to the frontend.
 
 // Input DTO — what the frontend is allowed to send when creating a client.
 export const createClientSchema = z.object({
@@ -13,6 +12,10 @@ export const createClientSchema = z.object({
   billingAddress: z.string().min(1),
 });
 export type CreateClientInput = z.infer<typeof createClientSchema>;
+
+// Update accepts any subset of the create fields (PATCH semantics).
+export const updateClientSchema = createClientSchema.partial();
+export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 
 // Output DTO — the safe public shape the backend returns (no internal fields).
 export const clientResponseSchema = z.object({

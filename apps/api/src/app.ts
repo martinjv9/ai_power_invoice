@@ -6,6 +6,8 @@ import connectPgSimple from "connect-pg-simple";
 import type { HealthResponse } from "@invoice/shared";
 import { pgPool } from "./lib/pg-pool";
 import { authRouter, SESSION_COOKIE_NAME } from "./routes/auth";
+import { clientsRouter } from "./routes/clients";
+import { requireAuth } from "./middleware/require-auth";
 
 // The Express app is created in a factory (not started here) so tests can spin up
 // an app instance without opening a real port. src/index.ts does the listening.
@@ -36,9 +38,10 @@ export function createApp() {
       name: SESSION_COOKIE_NAME,
       store: new PgStore({
         pool: pgPool,
-        // The store owns its table (it's infrastructure, not domain data —
-        // which is why it isn't in the Prisma schema).
-        createTableIfMissing: true,
+        // The session table is created by Prisma migrations (see the Session
+        // model) — auto-creating it here would look like schema drift to
+        // `prisma migrate dev`.
+        createTableIfMissing: false,
         // Timer-based cleanup only in production; in dev/tests it would keep
         // the event loop alive and stop processes from exiting.
         pruneSessionInterval: isProduction ? 60 * 15 : false,
@@ -66,6 +69,8 @@ export function createApp() {
   });
 
   app.use("/auth", authRouter);
+  // Everything below requires a logged-in staff member.
+  app.use("/clients", requireAuth, clientsRouter);
 
   // Central JSON error handler — keeps stack traces out of responses.
   // (Express identifies error middleware by arity, so all 4 params matter.)
